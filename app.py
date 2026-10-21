@@ -196,6 +196,10 @@ def get_flights(lamin, lomin, lamax, lomax):
 
 # ---------- Claude agent ----------
 
+class ClientGone(Exception):
+    """The browser closed the connection (reload, tab closed); stop working on its request."""
+
+
 HANDLERS = {"web_search": web_search, "fetch_page": fetch_page}
 TOOLS = [
     {"name": "web_search",
@@ -316,11 +320,18 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
         lock = threading.Lock()
+        gone = threading.Event()
 
         def emit(event):
-          with lock:
-            self.wfile.write((json.dumps(event) + "\n").encode())
-            self.wfile.flush()
+            if gone.is_set():
+                raise ClientGone()
+            with lock:
+                try:
+                    self.wfile.write((json.dumps(event) + "\n").encode())
+                    self.wfile.flush()
+                except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                    gone.set()
+                    raise ClientGone()
 
         try:
             if req.get("flight"):
@@ -334,8 +345,13 @@ class Handler(BaseHTTPRequestHandler):
                                        f"\n\nQuestion: {req['question']}", emit)
             else:
                 emit({"type": "error", "message": "Ask a question or pick a plane."})
+        except ClientGone:
+            print("  (browser closed the request — stopped)", flush=True)
         except Exception as ex:
-            emit({"type": "error", "message": str(ex)})
+            try:
+                emit({"type": "error", "message": str(ex)})
+            except ClientGone:
+                pass
 
     def log_message(self, *args):
         pass
