@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyWatch</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#05070b; --panel:rgba(12,16,24,.86); --line:rgba(255,255,255,.08); --text:#eef1f7; --muted:#8c95a8;
+          --a1:#22d3ee; --a2:#a78bfa; --ok:#34d399; --bad:#fb7185; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font:15px/1.55 Inter,system-ui,sans-serif; }
+  #map { position:fixed; inset:0; background:#05070b; }
+  .leaflet-container { background:#05070b; }
+  .leaflet-control-attribution { background:rgba(0,0,0,.5)!important; color:#667!important; }
+  .leaflet-control-attribution a { color:#88a!important; }
+
+  /* header */
+  .hud { position:fixed; top:16px; left:16px; z-index:500; padding:14px 18px; background:var(--panel);
+         border:1px solid var(--line); border-radius:16px; backdrop-filter:blur(14px); }
+  .brand { font:700 22px "Space Grotesk",sans-serif; letter-spacing:.02em; display:flex; align-items:center; gap:10px; }
+  .brand span { background:linear-gradient(90deg,var(--a1),var(--a2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .live { width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 12px var(--ok); animation:pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity:.3; } }
+  .hudmeta { font:12px "JetBrains Mono",monospace; color:var(--muted); margin-top:4px; }
+  .legend { display:flex; align-items:center; gap:8px; margin-top:10px; font:11px "JetBrains Mono",monospace; color:var(--muted); }
+  .legend i { display:block; width:120px; height:6px; border-radius:3px;
+              background:linear-gradient(90deg,hsl(160 90% 60%),hsl(230 90% 70%),hsl(300 90% 70%)); }
+
+  /* panel */
+  .panel { position:fixed; top:16px; right:16px; bottom:16px; width:400px; z-index:500; display:flex; flex-direction:column;
+           background:var(--panel); border:1px solid var(--line); border-radius:18px; backdrop-filter:blur(16px); overflow:hidden; }
+  .scroll { flex:1; overflow-y:auto; padding:18px; }
+  .label { font:500 11px "JetBrains Mono",monospace; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); margin:0 0 10px; }
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px; }
+  .stat { padding:12px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.02); cursor:default; }
+  .stat.click { cursor:pointer; } .stat.click:hover { border-color:rgba(34,211,238,.4); }
+  .stat b { display:block; font:700 20px "Space Grotesk",sans-serif; }
+  .stat small { color:var(--muted); font-size:12px; }
+
+  .flight { border:1px solid rgba(34,211,238,.35); border-radius:14px; padding:16px; margin-bottom:18px;
+            background:linear-gradient(160deg,rgba(34,211,238,.08),rgba(167,139,250,.06)); animation:in .3s ease both; }
+  .flight h2 { margin:0; font:700 28px "Space Grotesk",sans-serif; letter-spacing:.02em; display:flex; justify-content:space-between; align-items:center; }
+  .x { cursor:pointer; color:var(--muted); font-size:20px; font-weight:400; }
+  .flight .sub { color:var(--muted); font-size:13px; margin:2px 0 12px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .grid div { font:12px "JetBrains Mono",monospace; color:var(--muted); }
+  .grid b { display:block; font:600 15px Inter,sans-serif; color:var(--text); }
+  .btn { width:100%; border:0; border-radius:12px; padding:12px; cursor:pointer; color:#05070b;
+         font:700 14px "Space Grotesk",sans-serif; background:linear-gradient(90deg,var(--a1),var(--a2)); }
+  .btn:disabled { opacity:.45; cursor:wait; }
+  .ext { display:inline-block; margin-top:10px; font-size:12px; color:var(--a1); text-decoration:none; }
+
+  .entry { margin-bottom:16px; animation:in .3s ease both; }
+  @keyframes in { from { opacity:0; transform:translateY(6px); } }
+  .q { font-weight:600; margin-bottom:8px; }
+  .trace { font:12px/1.5 "JetBrains Mono",monospace; border-left:2px solid var(--line); padding-left:10px; margin-bottom:10px; }
+  .row { display:flex; gap:8px; padding:3px 0; }
+  .row .arg { flex:1; word-break:break-all; }
+  .row .meta { color:var(--muted); white-space:nowrap; } .row .meta.bad { color:var(--bad); }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--a1); display:inline-block; animation:pulse 1s infinite; }
+  .think { color:var(--muted); }
+  .ans { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+  .ans p { margin:0 0 6px; } .ans p:last-child { margin:0; } .ans ul { margin:4px 0 6px; padding-left:18px; }
+  .ans a { color:var(--a1); word-break:break-all; } .ans .t { color:var(--muted); font-size:12px; margin-top:8px; }
+  .err { color:var(--bad); white-space:pre-wrap; }
+
+  .ask { border-top:1px solid var(--line); padding:12px; }
+  .chips { display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; scrollbar-width:none; }
+  .chip { flex:none; font-size:12px; padding:6px 11px; border-radius:999px; border:1px solid var(--line);
+          color:var(--muted); cursor:pointer; background:rgba(255,255,255,.02); }
+  .chip:hover { color:var(--text); }
+  .askbox { display:flex; gap:8px; }
+  .askbox input { flex:1; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.04);
+                  color:var(--text); font:inherit; outline:0; }
+  .askbox input:focus { border-color:rgba(34,211,238,.5); }
+  .askbox button { border:0; border-radius:12px; padding:0 16px; font:700 14px "Space Grotesk",sans-serif; cursor:pointer;
+                   color:#05070b; background:linear-gradient(90deg,var(--a1),var(--a2)); }
+
+  .plane { transition:transform .2s; filter:drop-shadow(0 0 4px currentColor); }
+  .plane.sel { filter:drop-shadow(0 0 10px #fff); }
+
+  @media (max-width:760px) {
+    .panel { top:auto; left:8px; right:8px; bottom:8px; width:auto; height:48vh; }
+    .hud { top:8px; left:8px; padding:10px 14px; } .legend { display:none; }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="hud">
+  <div class="brand"><div class="live"></div><span>SKYWATCH</span></div>
+  <div class="hudmeta" id="hudmeta">connecting…</div>
+  <div class="legend">0 ft <i></i> 40k ft · scroll out for the world</div>
+</div>
+
+<aside class="panel">
+  <div class="scroll" id="scroll">
+    <div id="sel"></div>
+    <p class="label">Airspace now</p>
+    <div class="stats" id="stats"></div>
+    <div id="feed"></div>
+  </div>
+  <div class="ask">
+    <div class="chips">
+      <span class="chip">What's the fastest plane and where is it going?</span>
+      <span class="chip">Which airlines are flying here right now?</span>
+      <span class="chip">Any international flights on the map?</span>
+      <span class="chip">Who's climbing fastest?</span>
+    </div>
+    <form class="askbox" id="askf">
+      <input id="askq" placeholder="Ask about the skies…" autocomplete="off">
+      <button>Ask</button>
+    </form>
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ft = m => m == null ? null : Math.round(m * 3.281);
+const kt = ms => ms == null ? null : Math.round(ms * 1.944);
+const fpm = v => v == null ? null : Math.round(v * 196.85);
+const hue = altFt => 160 + Math.min(Math.max((altFt ?? 0) / 40000, 0), 1) * 140;
+
+const map = L.map("map", { zoomControl:false, attributionControl:true, minZoom:2, worldCopyJump:true }).setView([37.62, -122.25], 9);
+L.control.zoom({ position:"bottomleft" }).addTo(map);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+  attribution:'Tiles &copy; Esri · ADS-B: OpenSky Network', maxZoom:16
+}).addTo(map);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+  maxZoom:16, opacity:.8
+}).addTo(map);
+
+// ---------- canvas plane layer (handles 10k+ aircraft) ----------
+const canvas = document.createElement("canvas");
+canvas.style.cssText = "position:absolute;inset:0;z-index:450;pointer-events:none";
+map.getContainer().appendChild(canvas);
+const ctx = canvas.getContext("2d");
+function resize() {
+  const dpr = window.devicePixelRatio || 1, s = map.getSize();
+  canvas.width = s.x * dpr; canvas.height = s.y * dpr;
+  canvas.style.width = s.x + "px"; canvas.style.height = s.y + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+map.on("resize", resize); resize();
+
+const PLANE = new Path2D("M12 2c.8 0 1.3.9 1.3 2v5.2l7.7 4.6v2l-7.7-2.4v4.8l2.2 1.7V21L12 20l-3.5 1v-1.1l2.2-1.7v-4.8L3 15.8v-2l7.7-4.6V4c0-1.1.5-2 1.3-2z");
+const BUCKETS = 14, GROUND = "#64748b", EASE_MS = 2500;
+const bucketColor = i => `hsl(${160 + i / (BUCKETS - 1) * 140} 90% 65%)`;
+const bucketOf = f => f.ground ? -1 : Math.round(Math.min(Math.max((ft(f.alt) ?? 0) / 40000, 0), 1) * (BUCKETS - 1));
+
+let flights = [], planes = new Map(), selected = null, busy = 0, drawn = [], hoverId = null;
+
+function posOf(p, now) {
+  const dt = Math.min((now - p.t0) / 1000, 120), dist = p.spd * dt, rad = p.hdg * Math.PI / 180;
+  const lat = p.lat + dist * Math.cos(rad) / 111320;
+  const lon = p.lon + dist * Math.sin(rad) / (111320 * Math.cos(p.lat * Math.PI / 180));
+  const k = Math.max(0, 1 - (now - p.offT) / EASE_MS), e = k * k;
+  return [lat + p.offLat * e, lon + p.offLon * e];
+}
+
+function animate(now) {
+  const s = map.getSize(); ctx.clearRect(0, 0, s.x, s.y);
+  const z = map.getZoom(), glyph = z >= 6, scale = Math.min(1.1, 0.45 + z * 0.07);
+  const groups = Array.from({ length:BUCKETS + 1 }, () => []);
+  drawn = [];
+  for (const p of planes.values()) {
+    const [la, lo] = posOf(p, now), pt = map.latLngToContainerPoint([la, lo]);
+    if (pt.x < -20 || pt.y < -20 || pt.x > s.x + 20 || pt.y > s.y + 20) continue;
+    drawn.push({ x:pt.x, y:pt.y, p, la, lo });
+    groups[p.b + 1].push(pt.x, pt.y, p.hdg);
+  }
+  for (let g = 0; g < groups.length; g++) {
+    const a = groups[g]; if (!a.length) continue;
+    ctx.fillStyle = g === 0 ? GROUND : bucketColor(g - 1);
+    if (!glyph) {
+      const r = z <= 3 ? 1.2 : 1.6;
+      ctx.beginPath();
+      for (let i = 0; i < a.length; i += 3) { ctx.moveTo(a[i] + r, a[i + 1]); ctx.arc(a[i], a[i + 1], r, 0, 6.2832); }
+      ctx.fill();
+    } else {
+      for (let i = 0; i < a.length; i += 3) {
+        ctx.save(); ctx.translate(a[i], a[i + 1]); ctx.rotate(a[i + 2] * Math.PI / 180);
+        ctx.scale(scale, scale); ctx.translate(-12, -12); ctx.fill(PLANE); ctx.restore();
+      }
+    }
+  }
+  for (const d of drawn) {
+    const isSel = selected && d.p.f.id === selected.id;
+    if (!isSel && d.p.f.id !== hoverId) continue;
+    ctx.beginPath(); ctx.arc(d.x, d.y, glyph ? 16 * scale : 7, 0, 6.2832);
+    ctx.strokeStyle = isSel ? "#fff" : "rgba(255,255,255,.5)"; ctx.lineWidth = isSel ? 2 : 1.2; ctx.stroke();
+  }
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+function nearest(pt) {
+  let best = null, bd = 144;
+  for (const d of drawn) { const dx = d.x - pt.x, dy = d.y - pt.y, dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = d; } }
+  return best;
+}
+const tip = L.tooltip({ direction:"top", offset:[0, -10] });
+map.on("mousemove", e => {
+  const d = nearest(e.containerPoint), id = d ? d.p.f.id : null;
+  map.getContainer().style.cursor = d ? "pointer" : "";
+  if (d) { tip.setLatLng([d.la, d.lo]).setContent(`${esc(d.p.f.cs)} · ${ft(d.p.f.alt)?.toLocaleString() ?? "—"} ft`); if (id !== hoverId) tip.openOn(map); }
+  else if (hoverId) map.closeTooltip(tip);
+  hoverId = id;
+});
+map.on("mouseout", () => { hoverId = null; map.closeTooltip(tip); });
+map.on("click", e => { const d = nearest(e.containerPoint); if (d) select(d.p.f.id, false); });
+
+// ---------- data ----------
+function bbox() {
+  const b = map.getBounds().pad(0.15);
+  return { lamin:Math.max(-90, b.getSouth()), lomin:Math.max(-180, b.getWest()),
+           lamax:Math.min(90, b.getNorth()), lomax:Math.min(180, b.getEast()) };
+}
+const visibleFlights = () => { const b = map.getBounds(); return flights.filter(f => b.contains([f.lat, f.lon])); };
+
+async function refresh() {
+  try {
+    const r = await fetch("/api/flights?" + new URLSearchParams(bbox()));
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    if (!d.total) { $("#hudmeta").textContent = "loading worldwide traffic… (first load ~30s)"; setTimeout(refresh, 4000); return; }
+    flights = d.flights;
+    const now = performance.now(), t0 = now - Math.max(0, Date.now() / 1000 - d.time) * 1000, seen = new Set();
+    for (const f of flights) {
+      seen.add(f.id);
+      let p = planes.get(f.id);
+      if (p) {
+        const [la, lo] = posOf(p, now);
+        let oLat = la - f.lat, oLon = lo - f.lon;
+        const q = { lat:f.lat, lon:f.lon, spd:f.ground ? 0 : (f.spd || 0), hdg:f.hdg || 0, t0, offLat:0, offLon:0, offT:now };
+        const [nla, nlo] = posOf(q, now);              // new predicted spot
+        oLat = la - nla; oLon = lo - nlo;
+        if (Math.abs(oLat) > 1 || Math.abs(oLon) > 1) { oLat = 0; oLon = 0; }
+        Object.assign(p, q, { offLat:oLat, offLon:oLon });
+      } else {
+        p = { lat:f.lat, lon:f.lon, spd:f.ground ? 0 : (f.spd || 0), hdg:f.hdg || 0, t0, offLat:0, offLon:0, offT:now };
+        planes.set(f.id, p);
+      }
+      p.f = f; p.b = bucketOf(f);
+    }
+    for (const id of planes.keys()) if (!seen.has(id)) planes.delete(id);
+    if (selected) { const s = flights.find(f => f.id === selected.id); if (s) { selected = s; renderSel(false); } }
+    $("#hudmeta").textContent = `${visibleFlights().length.toLocaleString()} in view · ${d.total.toLocaleString()} worldwide · ${d.source} · ${new Date(d.time * 1000).toLocaleTimeString()}`;
+    renderStats();
+  } catch (e) { $("#hudmeta").textContent = "feed error: " + e.message.slice(0, 80); }
+}
+
+function renderStats() {
+  const vis = visibleFlights(), air = vis.filter(f => !f.ground);
+  const hi = air.reduce((a, f) => (f.alt ?? 0) > (a?.alt ?? -1) ? f : a, null);
+  const fast = air.reduce((a, f) => (f.spd ?? 0) > (a?.spd ?? -1) ? f : a, null);
+  const countries = new Set(vis.map(f => f.country)).size;
+  $("#stats").innerHTML = `
+    <div class="stat"><b>${air.length.toLocaleString()}</b><small>airborne · ${(vis.length - air.length).toLocaleString()} on ground</small></div>
+    <div class="stat"><b>${countries}</b><small>countries of registry</small></div>
+    <div class="stat click" data-id="${hi?.id ?? ""}"><b>${hi ? ft(hi.alt).toLocaleString() + " ft" : "—"}</b><small>highest · ${esc(hi?.cs ?? "")}</small></div>
+    <div class="stat click" data-id="${fast?.id ?? ""}"><b>${fast ? kt(fast.spd) + " kt" : "—"}</b><small>fastest · ${esc(fast?.cs ?? "")}</small></div>`;
+  document.querySelectorAll(".stat.click").forEach(s => s.onclick = () => s.dataset.id && select(s.dataset.id, true));
+}
+
+function select(id, fly) {
+  const f = flights.find(x => x.id === id); if (!f) return;
+  selected = f;
+  if (fly) { const p = planes.get(id), [la, lo] = p ? posOf(p, performance.now()) : [f.lat, f.lon]; map.flyTo([la, lo], Math.max(map.getZoom(), 8), { duration:.8 }); }
+  renderSel(true);
+}
+
+function renderSel(scroll) {
+  const f = selected;
+  if (!f) { $("#sel").innerHTML = ""; return; }
+  const v = fpm(f.vr), arrow = v > 300 ? "↗ climbing" : v < -300 ? "↘ descending" : "→ level";
+  $("#sel").innerHTML = `<div class="flight">
+    <h2>${esc(f.cs)} <span class="x" id="close">×</span></h2>
+    <div class="sub">${esc(f.country)} · ICAO ${esc(f.id)} · ${f.ground ? "on ground" : arrow}</div>
+    <div class="grid">
+      <div>ALT<b>${ft(f.alt)?.toLocaleString() ?? "—"} ft</b></div>
+      <div>SPEED<b>${kt(f.spd) ?? "—"} kt</b></div>
+      <div>HDG<b>${Math.round(f.hdg || 0)}°</b></div>
+    </div>
+    <button class="btn" id="brief">✦ Brief me on this flight</button>
+    <a class="ext" href="https://globe.adsbexchange.com/?icao=${encodeURIComponent(f.id)}" target="_blank" rel="noopener">Open in ADS-B Exchange ↗</a>
+  </div>`;
+  $("#close").onclick = () => { selected = null; renderSel(); };
+  $("#brief").onclick = () => ask({ flight:f }, `Brief me on ${f.cs}`);
+  if (scroll) $("#scroll").scrollTop = 0;
+}
+
+function md(s) {
+  const inline = t => esc(t)
+    .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  let html = "", list = false;
+  for (const raw of s.split("\n")) {
+    const line = raw.trim();
+    if (/^[-*•] /.test(line)) { if (!list) { html += "<ul>"; list = true; } html += `<li>${inline(line.slice(2))}</li>`; continue; }
+    if (list) { html += "</ul>"; list = false; }
+    if (!line) continue;
+    html += `<p>${inline(line.replace(/^#+\s*/, ""))}</p>`;
+  }
+  return html + (list ? "</ul>" : "");
+}
+
+async function ask(payload, title) {
+  busy++;
+  const n = Date.now();
+  $("#feed").insertAdjacentHTML("afterbegin", `<div class="entry" id="e${n}"><div class="q">${esc(title)}</div><div class="trace" id="t${n}"></div><div id="a${n}"></div></div>`);
+  const T = $("#t" + n), A = $("#a" + n);
+  const thinking = () => { T.querySelector(".think")?.remove(); T.insertAdjacentHTML("beforeend", `<div class="row think"><span class="dot"></span><span class="arg">Claude is reasoning…</span></div>`); };
+  const handle = ev => {
+    if (ev.type === "thinking") thinking();
+    else if (ev.type === "step") { T.querySelector(".think")?.remove();
+      T.insertAdjacentHTML("beforeend", `<div class="row" data-id="${esc(ev.id)}"><span>${ev.tool === "web_search" ? "🔎" : "📄"}</span><span class="arg">${esc(ev.arg)}</span><span class="meta"><span class="dot"></span></span></div>`); }
+    else if (ev.type === "step_done") { const m = T.querySelector(`[data-id="${CSS.escape(ev.id)}"] .meta`);
+      if (m) { m.className = "meta" + (ev.ok ? "" : " bad"); m.textContent = ev.ok ? `${(ev.ms/1000).toFixed(1)}s` : "failed"; } }
+    else if (ev.type === "answer") { T.querySelector(".think")?.remove(); A.innerHTML = `<div class="ans">${md(ev.text)}<div class="t">${ev.seconds}s · Claude × Bright Data</div></div>`; }
+    else if (ev.type === "error") { T.querySelector(".think")?.remove(); A.innerHTML = `<div class="ans err">${esc(ev.message)}</div>`; }
+  };
+  thinking();
+  try {
+    const r = await fetch("/api/ask", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
+    const reader = r.body.getReader(), dec = new TextDecoder(); let buf = "";
+    for (;;) { const { value, done } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream:true });
+      let i; while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) handle(JSON.parse(line)); } }
+  } catch (e) { handle({ type:"error", message:e.message }); }
+  finally { busy--; }
+}
+
+const askPayload = q => { const v = visibleFlights(); return { question:q, flights:v.slice(0, 300), visible_count:v.length }; };
+$("#askf").onsubmit = e => { e.preventDefault(); const q = $("#askq").value.trim(); if (!q) return; $("#askq").value = ""; ask(askPayload(q), q); };
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => ask(askPayload(c.textContent), c.textContent));
+
+let t; map.on("moveend", () => { clearTimeout(t); t = setTimeout(refresh, 400); });
+refresh(); setInterval(refresh, 15000);
+</script>
+</body>
+</html>

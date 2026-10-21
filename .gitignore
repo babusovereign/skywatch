@@ -1,0 +1,13 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.key
+# generated data
+world_cache.json
+*.tmp
+# python
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
