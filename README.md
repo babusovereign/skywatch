@@ -10,9 +10,11 @@ Built at [San Francisco | Claude Code Build Night: Research with Web Data](https
 
 <sub>Built at <a href="https://luma.com/claude-9gt7">San Francisco | Claude Code Build Night: Research with Web Data</a> (Oct 20, 2026)</sub>
 
-▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 📑 [Demo slides (PDF)](docs/SkyWatch-Demo.pdf) · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
+🌐 **[Try it live](https://babusovereign.com/builds/skywatch/)** · ▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 📑 [Demo slides (PDF)](docs/SkyWatch-Demo.pdf) · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
 
 [![SkyWatch live demo at the Claude Community San Francisco workshop](docs/demo-thumbnail.jpg)](https://www.youtube.com/watch?v=rLcXh3crHt8)
+
+> **About the online version:** [babusovereign.com/builds/skywatch](https://babusovereign.com/builds/skywatch/) is a lighter, free-to-run edition. It uses openly licensed flight data refreshed every 30 minutes and a Llama-powered chat, with no Bright Data or Claude API calls. The full app in this repo adds live Brief me research with Claude and Bright Data.
 
 ---
 
