@@ -12,7 +12,7 @@ Built at [San Francisco | Claude Code Build Night: Research with Web Data](https
 
 ▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 📑 [Demo slides (PDF)](docs/SkyWatch-Demo.pdf) · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
 
-[![SkyWatch live demo](https://img.youtube.com/vi/rLcXh3crHt8/hqdefault.jpg)](https://www.youtube.com/watch?v=rLcXh3crHt8)
+[![SkyWatch live demo at the Claude Community San Francisco workshop](docs/demo-thumbnail.jpg)](https://www.youtube.com/watch?v=rLcXh3crHt8)
 
 ---
 
