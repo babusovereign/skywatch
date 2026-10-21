@@ -4,17 +4,19 @@
 
 Every dot on the map is a real aircraft in the air right now. Click any plane and an AI agent researches it on the live web, returning the airline, route, aircraft type and status, with sources.
 
+### 🌐 [Try SkyWatch live →](https://babusovereign.com/builds/skywatch/)
+
+> Runs in your browser, nothing to install. The online edition is a lighter, free-to-run version: openly licensed flight data refreshed every 30 minutes and a Llama-powered chat, with no Bright Data or Claude API calls. The full app in this repo adds live Brief me research with Claude and Bright Data.
+
 Built at [San Francisco | Claude Code Build Night: Research with Web Data](https://luma.com/claude-9gt7), October 20, 2026.
 
 <a href="https://luma.com/claude-9gt7"><img src="event-badge.png" alt="Claude Community San Francisco Workshop" width="160"></a>
 
 <sub>Built at <a href="https://luma.com/claude-9gt7">San Francisco | Claude Code Build Night: Research with Web Data</a> (Oct 20, 2026)</sub>
 
-🌐 **[Try it live](https://babusovereign.com/builds/skywatch/)** · ▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 📑 [Demo slides (PDF)](docs/SkyWatch-Demo.pdf) · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
+▶️ **[Watch the event demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 📑 [Demo slides (PDF)](docs/SkyWatch-Demo.pdf) · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
 
 [![SkyWatch live demo at the Claude Community San Francisco workshop](docs/demo-thumbnail.jpg)](https://www.youtube.com/watch?v=rLcXh3crHt8)
-
-> **About the online version:** [babusovereign.com/builds/skywatch](https://babusovereign.com/builds/skywatch/) is a lighter, free-to-run edition. It uses openly licensed flight data refreshed every 30 minutes and a Llama-powered chat, with no Bright Data or Claude API calls. The full app in this repo adds live Brief me research with Claude and Bright Data.
 
 ---
 
