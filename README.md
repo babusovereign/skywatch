@@ -6,7 +6,7 @@ Every dot on the map is a real aircraft in the air right now. Click any plane an
 
 Built at [San Francisco | Claude Code Build Night: Research with Web Data](https://luma.com/claude-9gt7), October 20, 2026.
 
-<a href="https://luma.com/claude-9gt7"><img src="https://images.lumacdn.com/api-uploads/dr/87088810-c1e9-4f3a-a9a8-9a3ae4760c68.png" alt="Claude Community San Francisco Workshop" width="160"></a>
+<a href="https://luma.com/claude-9gt7"><img src="event-badge.png" alt="Claude Community San Francisco Workshop" width="160"></a>
 
 <sub>Built at <a href="https://luma.com/claude-9gt7">San Francisco | Claude Code Build Night: Research with Web Data</a> (Oct 20, 2026)</sub>
 
