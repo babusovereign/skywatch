@@ -6,6 +6,10 @@ Every dot on the map is a real aircraft in the air right now. Click any plane an
 
 Built at the Claude × Bright Data build night, San Francisco, October 2026.
 
+▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
+
+[![SkyWatch live demo](https://img.youtube.com/vi/rLcXh3crHt8/hqdefault.jpg)](https://www.youtube.com/watch?v=rLcXh3crHt8)
+
 ---
 
 ## Features
