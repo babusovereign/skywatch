@@ -10,7 +10,7 @@ Built at [San Francisco | Claude Code Build Night: Research with Web Data](https
 
 <sub>Built at <a href="https://luma.com/claude-9gt7">San Francisco | Claude Code Build Night: Research with Web Data</a> (Oct 20, 2026)</sub>
 
-▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
+▶️ **[Watch the live demo](https://www.youtube.com/watch?v=rLcXh3crHt8)** · 📑 [Demo slides (PDF)](docs/SkyWatch-Demo.pdf) · 🏁 [HackerSquad project page](https://hackersquad.io/events/san-francisco-claude-code-build-night-research-with-web-data/projects/cmvhjow69004lpg239x6ec3z4)
 
 [![SkyWatch live demo](https://img.youtube.com/vi/rLcXh3crHt8/hqdefault.jpg)](https://www.youtube.com/watch?v=rLcXh3crHt8)
 
@@ -126,4 +126,10 @@ skywatch/
 
 ## Credits
 
-Built by [Babu Perumalla](https://github.com/babusovereign) with Claude. Flight data © [OpenSky Network](https://opensky-network.org); basemap © Esri.
+Built by [Babu Sovereign Perumalla](https://github.com/babusovereign) with Claude. Flight data © [OpenSky Network](https://opensky-network.org); basemap © Esri.
+
+## License
+
+Copyright 2026 Babu Sovereign Perumalla. Licensed under the [Apache License 2.0](LICENSE). If you reuse or redistribute this code, keep the [NOTICE](NOTICE) file with it.
+
+The license covers this project's code only. OpenSky Network flight data and Esri basemap tiles are subject to their providers' own terms.
