@@ -16,6 +16,24 @@ Built at [San Francisco | Claude Code Build Night: Research with Web Data](https
 
 ---
 
+## Screenshots
+
+**Live world map:** every airborne plane, colored by altitude.
+
+![World view](docs/screenshots/world-view.jpg)
+
+**Zoomed into the Bay Area:** plane icons gliding between updates, with live airspace stats.
+
+![Bay Area](docs/screenshots/bay-area.jpg)
+
+**Brief me:** Claude researches a clicked flight on the live web, shows each search and page read, and says plainly what it can't confirm.
+
+![Brief me on SWA2259](docs/screenshots/brief-me.jpg)
+
+**Ask the skies:** questions about the traffic on screen, answered from the live snapshot plus the web.
+
+![Ask the skies](docs/screenshots/ask-the-skies.jpg)
+
 ## Features
 
 | | |
