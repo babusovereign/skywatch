@@ -18,7 +18,7 @@ Built at [San Francisco | Claude Code Build Night: Research with Web Data](https
 
 ## Screenshots
 
-**Live world map:** every airborne plane, colored by altitude.
+**Live world map:** every airborne plane over the Americas, colored by altitude.
 
 ![World view](docs/screenshots/world-view.jpg)
 
